@@ -8,7 +8,7 @@ from CSPPolicy import CSPPolicy
 
 class CSPSolver:
     # init
-    def __init__(self, algorithm: Callable[[CSPNode, CSPConstraints, int], bool] = CSPAlgorithm.StandardBacktracking,
+    def __init__(self, algorithm: Callable[[CSPNode, CSPConstraints, int, str], bool] = CSPAlgorithm.StandardBacktracking,
                  policy: Callable[[CSPNode, int], bool] = CSPPolicy.InsertOrder,
                  step_arc_consistency: bool = False):
         self._constraints: CSPConstraints = CSPConstraints()
@@ -48,11 +48,11 @@ class CSPSolver:
     def _next_step(self, current_node: CSPNode, tree_depth: int, one_solution: bool):
         # assegno la variabile e faccio uno snapshot delle variabili
         # in questo modo se quella assegnazione fallisce, posso tornare allo snapshot
-        print("Passo " + str(tree_depth))
         variable = self._policy(current_node, tree_depth)
         
         # ciclo sui valori della variabile da assegnare
         for value in variable.domain:
+
             # Costruiamo il prossimo nodo
             child_node = CSPNode(current_node, deepcopy(current_node.get_variables()))
             current_node.add_child(child_node)
@@ -81,7 +81,6 @@ class CSPSolver:
                         break
             else:
                 # Descrizione del fallimento
-                print("Fallimento")
                 child_node.set_failure()
     
     def solve(self, one_solution: bool = True):

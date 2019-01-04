@@ -8,6 +8,10 @@ class CSPVariable:
     
     def assign_value(self, value):
         self.value = value
+    
+    def delete_value(self, value):
+        if value in self.domain:
+            self.domain.remove(value)
 
     def __str__(self):
         if self.value:

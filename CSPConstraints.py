@@ -12,23 +12,27 @@ class CSPConstraints:
 
     def verify(self, values: Dict[str, Any]):
         n_keys = len(values.keys())
+
         if n_keys == 1:
             name = list(values.keys())[0]
             for constraint in self.get_unary_constraints(name):
                 if not constraint(values[name]):
                     return False
+        
         elif n_keys == 2:
             name_1 = list(values.keys())[0]
             name_2 = list(values.keys())[1]
+
             constraints_1, constraints_2 = self.get_binary_constraints(name_1, name_2)
+
             for constraint in constraints_1:
-                print("Vincolo tra " + name_1 + " e " + name_2)
                 if not constraint(values[name_1], values[name_2]):
                     return False
+            
             for constraint in constraints_2:
-                print("Vincolo tra " + name_2 + " e " + name_1)
                 if not constraint(values[name_2], values[name_1]):
                     return False
+        
         return True
     
     def get_unary_constraints(self, variable_name):
