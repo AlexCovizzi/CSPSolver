@@ -18,6 +18,7 @@ class CSPSolver:
         self._algorithm = algorithm
         self._policy = policy
         self._step_arc_consistency = step_arc_consistency
+        self.is_node_consistent = False
         
     # Add a constraint
     def add_constraint(self, variables: Tuple[str, ...], constraint: Callable):
@@ -48,7 +49,7 @@ class CSPSolver:
     def _next_step(self, current_node: CSPNode, tree_depth: int, one_solution: bool):
         # assegno la variabile e faccio uno snapshot delle variabili
         # in questo modo se quella assegnazione fallisce, posso tornare allo snapshot
-        variable = self._policy(current_node, tree_depth)
+        variable = self._policy(current_node, self._constraints, tree_depth)
         
         # ciclo sui valori della variabile da assegnare
         for value in variable.domain:
@@ -87,11 +88,56 @@ class CSPSolver:
         self._next_step(self._root, 0, one_solution)
         
     
-    def apply_arc_consistency(self, node: CSPNode):
+    def apply_arc_consistency(self, node: CSPNode=None):
+        if not node:
+            node = self._root
+        
+        if not self.is_node_consistent:
+            self.apply_node_consistency(node)
+
+        for variable_1 in node.get_variables():
+            for variable_2 in [v for v in node.get_variables() if not v.value and variable_1.name != v.name]:
+                # La variabile 1 è assegnata: potrà cambiare solo il dominio della variabile 2
+                if variable_1.value:
+                    for value_2 in variable_2.domain[:]:
+                        if not self._constraints.verify({variable_1.name: variable_1.value, variable_2.name: value_2}):
+                            variable_2.delete_value(value_2)
+
+                            if not variable_2.domain:
+                                return False
+                # La variabile 1 non è assegnata: potranno cambiare entrambi i domini
+                else:
+                    for value_1 in variable_1.domain[:]:
+                        delete_value = True
+
+                        for value_2 in variable_2.domain:
+                            if self._constraints.verify({variable_1.name: value_1, variable_2.name: value_2}):
+                                delete_value = False
+                        
+                        if delete_value:
+                            variable_1.delete_value(value_1)
+                    
+                        if not variable_1.domain:
+                            return False
+
         return True
 
-    def apply_node_consistency(self, node: CSPNode):
+    def apply_node_consistency(self, node: CSPNode=None):
+        if not node:
+            node = self._root
+
+        for variable in node.get_variables():
+            for value in variable.domain[:]:
+                if not self._constraints.verify({variable.name: value}):
+                    variable.delete_value(value)
+                    if not variable.domain:
+                        return False
+                
+        self.is_node_consistent = True
         return True
+
+    def __str__(self):
+        return "Nodo radice del problema:\n" + str(self._root)
 
     def print_tree(self):
         self._print_node(self._root)
@@ -100,3 +146,8 @@ class CSPSolver:
         print(node)
         for child in node.get_children():
             self._print_node(child)
+    
+    def print_solutions(self):
+        print("Le soluzioni trovate sono:")
+        for solution in self._solutions:
+            print(solution)

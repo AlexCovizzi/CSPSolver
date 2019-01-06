@@ -36,8 +36,8 @@ class CSPConstraints:
         return True
     
     def get_unary_constraints(self, variable_name):
-        if tuple(variable_name) in self._constraints.keys():
-            return self._constraints[(variable_name)]
+        if (variable_name,) in self._constraints.keys():
+            return self._constraints[(variable_name,)]
         else:
             return []
 
@@ -50,3 +50,7 @@ class CSPConstraints:
             constraints_21 = self._constraints[(variable_name_2, variable_name_1)]
         
         return (constraints_12, constraints_21)
+
+    def get_variable_constraints(self, variable_name):
+        constraints_list = [item[1] for item in list(self._constraints.items()) if variable_name in item[0]]
+        return [constraint for constraints in constraints_list for constraint in constraints]
