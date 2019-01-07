@@ -7,7 +7,7 @@ if __name__ == "__main__":
     solver = CSPSolver(CSPAlgorithm.FullLookAhead, CSPPolicy.MinimumRemainingValues, True)
     
     for i in range(1, 9):
-        solver.add_variable("r"+str(i), list(range(1, 9)))
+        solver.add_variable("r"+str(i), list(range(1, 25)))
     for i in range(1, 9):
         for j in range(i + 1, 9):
             solver.add_constraint(("r" + str(i), "r" + str(j)), lambda x1, x2: x1 != x2)

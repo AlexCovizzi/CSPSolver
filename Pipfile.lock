@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "6456602b4cc2b0bd9e055bfaf597051e6eb420d98c89746c9fd644ab8becf893"
+            "sha256": "cb3560fd7c9081fce83beda437559cd6e6e28e9ae4f7bc3f04d35bbac369bedb"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -15,7 +15,26 @@
             }
         ]
     },
-    "default": {},
+    "default": {
+        "pycairo": {
+            "file": "https://download.lfd.uci.edu/pythonlibs/r5uhg2lo/pycairo-1.18.0-cp36-cp36m-win_amd64.whl",
+            "hashes": [
+                "sha256:8cdcc648d3857c7855b2923e0bb24d64c6c77bb1fd5e20f71cc59afa1dd37546"
+            ],
+            "index": "pypi",
+            "markers": "sys_platform == 'win32'",
+            "version": "==1.18.0"
+        },
+        "python-igraph": {
+            "file": "https://download.lfd.uci.edu/pythonlibs/r5uhg2lo/python_igraph-0.7.1.post6-cp36-cp36m-win_amd64.whl",
+            "hashes": [
+                "sha256:a68fc4cc71e41447b5f496b8f704573e3fdb8242986000020aad3ec8380771fb"
+            ],
+            "index": "pypi",
+            "markers": "sys_platform == 'win32'",
+            "version": "==0.7.1.post6"
+        }
+    },
     "develop": {
         "jedi": {
             "hashes": [

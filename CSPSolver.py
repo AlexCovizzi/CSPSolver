@@ -59,9 +59,9 @@ class CSPSolver:
             current_node.add_child(child_node)
 
             # Assegna un valore alla variabile da assegnare
-            child_node.get_variable_by_name(variable.name).assign_value(value)
+            child_node.assign_variable(variable.name, value)
 
-            # Algoritmo applicato al child node: i domini delle variabili non assegnate verranno modificati (a seconda dell'algoritmo scelto)
+            # Algoritmo applicato al child node: i domini delle variabili non assegnate verranno modificati (a seconda dell"algoritmo scelto)
             if self._algorithm(child_node, self._constraints, tree_depth, variable.name):
                 if self._step_arc_consistency:
                     if not self.apply_arc_consistency(child_node):
@@ -73,7 +73,7 @@ class CSPSolver:
                     self._solutions.append(child_node)
                     
                     # Voglio una sola soluzione: blocco tutti i cicli
-                    if one_solution: # one_solution è un parametro indicato dal'utente
+                    if one_solution: # one_solution è un parametro indicato dal"utente
                         self._found_solution = True
                         break
                 else:
