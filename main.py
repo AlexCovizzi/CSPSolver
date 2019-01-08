@@ -1,19 +1,23 @@
 from CSPSolver import CSPSolver
 from CSPAlgorithm import CSPAlgorithm
 from CSPPolicy import CSPPolicy
-from TreePlot import TreePlot
+from TreePlot import SolverPlot
 
 if __name__ == "__main__":
-    solver = CSPSolver(CSPAlgorithm.FullLookAhead, CSPPolicy.MinimumRemainingValues, True)
+    solver = CSPSolver(CSPAlgorithm.StandardBacktracking, CSPPolicy.InsertOrder, True)
     
-    for i in range(1, 9):
-        solver.add_variable("r"+str(i), list(range(1, 25)))
-    for i in range(1, 9):
-        for j in range(i + 1, 9):
-            solver.add_constraint(("r" + str(i), "r" + str(j)), lambda x1, x2: x1 != x2)
+    n = 9
+    for i in range(1, n):
+        solver.add_variable("r"+str(i), list(range(1, n)))
 
-    for i in range(1, 9):
-        for j in range(i + 1, 9):
+    solver.add_constraint(("r1",), lambda x: x > 5)
+
+    for i in range(1, n):
+        for j in range(i + 1, n):
+            solver.add_constraint(("r" + str(i), "r" + str(j)), lambda xi, xj: xi != xj)
+
+    for i in range(1, n):
+        for j in range(i + 1, n):
             solver.add_constraint(("r" + str(i), "r" + str(j)), lambda xi, xj, j=j, i=i: xi != xj + (j - i))
             solver.add_constraint(("r" + str(i), "r" + str(j)), lambda xi, xj, j=j, i=i: xi != xj - (j - i))
 
@@ -25,5 +29,10 @@ if __name__ == "__main__":
     # solver.print_solutions()
     solver.print_tree()
 
-    plotter = TreePlot()
-    plotter.draw(solver._root)
+    plotter = SolverPlot(solver)
+    plotter.draw_decision_tree()
+
+    plotter.draw_constraint_graph()
+
+    import inspect
+    print(inspect.getsourcelines(solver._constraints.get_binary_constraints("r1", "r2")[0][0]))
