@@ -1,4 +1,5 @@
 from typing import Callable, Dict, Tuple, List
+import sys
 from copy import deepcopy
 from CSPNode import CSPNode
 from CSPConstraints import CSPConstraints
@@ -38,15 +39,7 @@ class CSPSolver:
         new_variable = CSPVariable(name, domain)
         self._root.add_variable(new_variable)
 
-    # Print problem variables
-    def show_variables(self):
-        pass
-
-    # Print problem constraints
-    def show_constraints(self):
-        pass
-
-    def _next_step(self, current_node: CSPNode, tree_depth: int, one_solution: bool):
+    def _next_step(self, current_node: CSPNode, tree_depth: int, one_solution: bool, target):
         # assegno la variabile e faccio uno snapshot delle variabili
         # in questo modo se quella assegnazione fallisce, posso tornare allo snapshot
         variable = self._policy(current_node, self._constraints, tree_depth)
@@ -61,39 +54,49 @@ class CSPSolver:
             # Assegna un valore alla variabile da assegnare
             child_node.assign_variable(variable.name, value)
 
+            if target: print(f"Assegno: {variable.name} = {value}", file = target)
+
             # Algoritmo applicato al child node: i domini delle variabili non assegnate verranno modificati (a seconda dell"algoritmo scelto)
-            if self._algorithm(child_node, self._constraints, tree_depth, variable.name):
+            if self._algorithm(child_node, self._constraints, tree_depth, variable.name, target):
                 if self._step_arc_consistency:
-                    if not self.apply_arc_consistency(child_node):
+                    if not self.apply_arc_consistency(child_node, target):
+                        if target: print(f"Assegnamento {variable.name} = {value} fallito", file = target)
                         child_node.set_failure()
                         continue
                 
                 if tree_depth + 1 == len(child_node.get_variables()):
                     child_node.set_solution()
                     self._solutions.append(child_node)
+                    if target: print(str(child_node) + "\n", file = target)
                     
                     # Voglio una sola soluzione: blocco tutti i cicli
                     if one_solution: # one_solution è un parametro indicato dal"utente
                         self._found_solution = True
                         break
                 else:
-                    self._next_step(child_node, tree_depth + 1, one_solution)
+                    self._next_step(child_node, tree_depth + 1, one_solution, target)
                     if self._found_solution:
                         break
             else:
                 # Descrizione del fallimento
+                if target: print(f"Assegnamento {variable.name} = {value} fallito", file = target)
                 child_node.set_failure()
     
-    def solve(self, one_solution: bool = True):
-        self._next_step(self._root, 0, one_solution)
+    def solve(self, one_solution: bool = True, target = None):
+        if target: print(str(self._root), file = target)
+
+        self._next_step(self._root, 0, one_solution, target)
         
     
-    def apply_arc_consistency(self, node: CSPNode=None):
+    def apply_arc_consistency(self, node: CSPNode=None, target = None):
+        if target: print("Applico arc-consistency...", file = target)
+
         if not node:
             node = self._root
         
         if not self.is_node_consistent:
-            self.apply_node_consistency(node)
+            if not self.apply_node_consistency(node):
+                return False
 
         for variable_1 in node.get_variables():
             for variable_2 in [v for v in node.get_variables() if not v.value and variable_1.name != v.name]:
@@ -102,6 +105,9 @@ class CSPSolver:
                     for value_2 in variable_2.domain[:]:
                         if not self._constraints.verify({variable_1.name: variable_1.value, variable_2.name: value_2}):
                             variable_2.delete_value(value_2)
+
+                            if target: print(f"{variable_2.name} = {value_2} non e' compatibile con {variable_1.name} = {variable_1.value}" +
+                                                f" -> Nuovo dominio di {variable_2.name}: {variable_2.domain}", file = target)
 
                             if not variable_2.domain:
                                 return False
@@ -116,13 +122,18 @@ class CSPSolver:
                         
                         if delete_value:
                             variable_1.delete_value(value_1)
+
+                            if target: print(f"{variable_1.name} = {value_1} non e' compatibile con i valori di {variable_2.name}" +
+                                                f" -> Nuovo dominio di {variable_1.name}: {variable_1.domain}", file = target)
                     
                         if not variable_1.domain:
                             return False
 
+        if target: print("Le variabili sono arc-consistenti.", file = target)
         return True
 
-    def apply_node_consistency(self, node: CSPNode=None):
+    def apply_node_consistency(self, node: CSPNode=None, target = None):
+        if target: print("Applico node-consistency...", file = target)
         if not node:
             node = self._root
 
@@ -134,20 +145,27 @@ class CSPSolver:
                         return False
                 
         self.is_node_consistent = True
+
+        if target: print("Le variabili sono node-consistenti.", file = target)
         return True
 
     def __str__(self):
         return "Nodo radice del problema:\n" + str(self._root)
 
-    def print_tree(self):
-        self._print_node(self._root)
+    def print_tree(self, target = sys.stdout):
+        self._print_node(self._root, 0, target)
         
-    def _print_node(self, node: CSPNode):
-        print(node)
+    def _print_node(self, node: CSPNode, index: int, target):
+        print(str(index) + " - " + str(node), file = target)
+        index += 1
         for child in node.get_children():
-            self._print_node(child)
+            index = self._print_node(child, index, target)
+        return index
     
-    def print_solutions(self):
-        print("Le soluzioni trovate sono:")
-        for solution in self._solutions:
-            print(solution)
+    def print_solutions(self, target = sys.stdout):
+        if self._solutions:
+            print("Le soluzioni trovate sono:", file = target)
+            for solution in self._solutions:
+                print(solution, file = target)
+        else:
+            print("Non sono state trovate soluzioni", file = target)

@@ -43,10 +43,13 @@ class CSPNode:
         self.solution = True
     
     def __str__(self):
-        string = "Info nodo:\n"
-        string += "\t- Variabili:\n"
-        for v in self.get_variables():
-            string += "\t\t" + str(v) + "\n"
-        string += "\t- Soluzione: " + str(self.solution) + "\n"
-        string += "\t- Fallimento: " + str(self.failure) + "\n"
+        string = ""
+        if self.solution:
+            string += "Soluzione"
+        elif self.failure:
+            string += "Fallimento"
+        string += "\n"
+
+        string += "\n".join([str(v) for v in self.get_variables()])
+        
         return string

@@ -4,7 +4,9 @@ from CSPVariable import CSPVariable
 
 class CSPAlgorithm:
     @staticmethod
-    def GenerateAndTest(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str):
+    def GenerateAndTest(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str, target):
+        if target: print("Applico l'algoritmo Generate and Test...", file = target)
+
         if tree_depth + 1 == len(node.get_variables()):
             for index, variable in enumerate(node.get_variables()):
                 # verifico vincoli unari
@@ -19,7 +21,9 @@ class CSPAlgorithm:
         return True
 
     @staticmethod
-    def StandardBacktracking(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str):
+    def StandardBacktracking(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str, target):
+        if target: print("Applico l'algoritmo Standard Backtracking...", file = target)
+
         variable = node.get_variable_by_name(last_assigned_variable_name)
         # verifico vincoli unari
         if not constraints.verify({variable.name: variable.value}):
@@ -34,7 +38,9 @@ class CSPAlgorithm:
         return True
 
     @staticmethod
-    def ForwardChecking(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str):
+    def ForwardChecking(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str, target):
+        if target: print("Applico l'algoritmo Forward Checking...", file = target)
+
         variable = node.get_variable_by_name(last_assigned_variable_name)
         # verifico vincoli unari
         if not constraints.verify({variable.name: variable.value}):
@@ -44,6 +50,9 @@ class CSPAlgorithm:
             for value in variable_not_assigned.domain[:]:
                 if not constraints.verify({variable.name: variable.value, variable_not_assigned.name: value}):
                     variable_not_assigned.delete_value(value)
+
+                    if target: print(f"{variable_not_assigned.name} = {value} non e' compatibile con {variable.name} = {variable.value}" +
+                                        f" -> Nuovo dominio di {variable_not_assigned.name}: {variable_not_assigned.domain}", file = target)
             
             if not variable_not_assigned.domain:
                 return False
@@ -51,10 +60,12 @@ class CSPAlgorithm:
         return True
 
     @staticmethod
-    def PartialLookAhead(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str):
+    def PartialLookAhead(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str, target):
+        if target: print("Applico l'algoritmo Partial Look Ahead...", file = target)
+            
         variable = node.get_variable_by_name(last_assigned_variable_name)
 
-        if not CSPAlgorithm.ForwardChecking(node, constraints, tree_depth, last_assigned_variable_name):
+        if not CSPAlgorithm.ForwardChecking(node, constraints, tree_depth, last_assigned_variable_name, target):
             return False
 
         for index, variable_not_assigned in enumerate([v for v in node.get_variables() if not v.value]):
@@ -70,16 +81,21 @@ class CSPAlgorithm:
                     if delete_value:
                         variable_not_assigned.delete_value(value)
 
+                        if target: print(f"{variable_not_assigned.name} = {value} non e' compatibile con i valori di {next_variable_not_assigned.name}" +
+                                            f" -> Nuovo dominio di {variable_not_assigned.name}: {variable_not_assigned.domain}", file = target)
+
                     if not variable_not_assigned.domain:
                         return False
 
         return True
         
     @staticmethod
-    def FullLookAhead(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str):
+    def FullLookAhead(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str, target):
+        if target: print("Applico l'algoritmo Full Look Ahead...", file = target)
+
         variable = node.get_variable_by_name(last_assigned_variable_name)
 
-        if not CSPAlgorithm.ForwardChecking(node, constraints, tree_depth, last_assigned_variable_name):
+        if not CSPAlgorithm.ForwardChecking(node, constraints, tree_depth, last_assigned_variable_name, target):
             return False
 
         for variable_not_assigned in [v for v in node.get_variables() if not v.value]:
@@ -94,6 +110,9 @@ class CSPAlgorithm:
 
                     if delete_value:
                         variable_not_assigned.delete_value(value)
+
+                        if target: print(f"{variable_not_assigned.name} = {value} non e' compatibile con i valori di {next_variable_not_assigned.name}" +
+                                            f" -> Nuovo dominio di {variable_not_assigned.name}: {variable_not_assigned.domain}", file = target)
 
                     if not variable_not_assigned.domain:
                         return False
