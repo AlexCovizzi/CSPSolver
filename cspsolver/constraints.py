@@ -1,10 +1,10 @@
-from typing import Callable, Dict, Tuple, List, Any
+from typing import Union, Callable, Dict, Tuple, List, Any, NewType
 
-class CSPConstraints:
+class Constraints:
     def __init__(self):
-        self._constraints : Dict[Tuple[str, ...], List[Callable]] = {}
+        self._constraints : Dict[Union[Tuple[str], Tuple[str, str]], List[Callable]] = {}
 
-    def add_constraint(self,variables: Tuple[str, ...], constraint: Callable):
+    def add_constraint(self, variables: Union[Tuple[str], Tuple[str, str]], constraint: Callable):
         if not variables in self._constraints.keys():
             self._constraints[variables] = []
 

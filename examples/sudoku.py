@@ -1,27 +1,14 @@
-from CSPSolver import CSPSolver
-from CSPAlgorithm import CSPAlgorithm
-from CSPPolicy import CSPPolicy
-from SolverPlot import *
+from sys import argv, path as sys_path
+from os import path as os_path, getcwd
+
+module_path = os_path.abspath(getcwd())
+if module_path not in sys_path: sys_path.append(module_path)
+
+from cspsolver import CSPSolver, Algorithm, Policy, draw_constraint_graph, draw_decision_tree
+
 
 if __name__ == "__main__":
-    '''
-    solver = CSPSolver(CSPAlgorithm.ForwardChecking, CSPPolicy.InsertOrder)
-    
-    n = 4
-    for i in range(1, n):
-        solver.add_variable("r"+str(i), list(range(1, n)))
-
-    for i in range(1, n):
-        for j in range(i + 1, n):
-            solver.add_constraint(("r" + str(i), "r" + str(j)), lambda xi, xj: xi != xj)
-
-    for i in range(1, n):
-        for j in range(i + 1, n):
-            solver.add_constraint(("r" + str(i), "r" + str(j)), lambda xi, xj, j=j, i=i: xi != xj + (j - i))
-            solver.add_constraint(("r" + str(i), "r" + str(j)), lambda xi, xj, j=j, i=i: xi != xj - (j - i))
-
-    '''
-    solver = CSPSolver(CSPAlgorithm.FullLookAhead, CSPPolicy.MinimumRemainingValues, True)
+    solver = CSPSolver(Algorithm.FullLookAhead, Policy.MinimumRemainingValues, True)
 
     # cell_ij -> riga i, colonna j
     for i in range(1, 10):
@@ -71,15 +58,14 @@ if __name__ == "__main__":
     
 
     solver.apply_node_consistency()
-    f = open("file.txt", "w+")
+    f = open("sudoku_steps.txt", "w+")
     solver.apply_arc_consistency(target = f)
 
-    solver.solve(True, f)
+    solver.solve(one_solution=True, target=f)
     f.close()
 
     solver.print_solutions()
     # solver.print_tree()
 
-    draw_decision_tree(solver)
-    draw_constraint_graph(solver)
-    
+    draw_decision_tree(solver, "sudoku_decision_tree.pdf")
+    draw_constraint_graph(solver, "sudoku_constraint_graph.pdf")

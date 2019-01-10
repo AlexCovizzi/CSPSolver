@@ -1,10 +1,11 @@
-from CSPNode import CSPNode
-from CSPConstraints import CSPConstraints
-from CSPVariable import CSPVariable
+from typing import TextIO, Optional
+from .node import Node
+from .constraints import Constraints
+from .variable import Variable
 
-class CSPAlgorithm:
+class Algorithm:
     @staticmethod
-    def GenerateAndTest(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str, target):
+    def GenerateAndTest(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]):
         if target: print("Applico l'algoritmo Generate and Test...", file = target)
 
         if tree_depth + 1 == len(node.get_variables()):
@@ -21,7 +22,7 @@ class CSPAlgorithm:
         return True
 
     @staticmethod
-    def StandardBacktracking(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str, target):
+    def StandardBacktracking(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]):
         if target: print("Applico l'algoritmo Standard Backtracking...", file = target)
 
         variable = node.get_variable_by_name(last_assigned_variable_name)
@@ -38,7 +39,7 @@ class CSPAlgorithm:
         return True
 
     @staticmethod
-    def ForwardChecking(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str, target):
+    def ForwardChecking(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]):
         if target: print("Applico l'algoritmo Forward Checking...", file = target)
 
         variable = node.get_variable_by_name(last_assigned_variable_name)
@@ -60,13 +61,14 @@ class CSPAlgorithm:
         return True
 
     @staticmethod
-    def PartialLookAhead(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str, target):
-        if target: print("Applico l'algoritmo Partial Look Ahead...", file = target)
+    def PartialLookAhead(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]):
             
         variable = node.get_variable_by_name(last_assigned_variable_name)
 
-        if not CSPAlgorithm.ForwardChecking(node, constraints, tree_depth, last_assigned_variable_name, target):
+        if not Algorithm.ForwardChecking(node, constraints, tree_depth, last_assigned_variable_name, target):
             return False
+            
+        if target: print("Applico l'algoritmo Partial Look Ahead...", file = target)
 
         for index, variable_not_assigned in enumerate([v for v in node.get_variables() if not v.value]):
             for value in variable_not_assigned.domain[:]:
@@ -90,13 +92,14 @@ class CSPAlgorithm:
         return True
         
     @staticmethod
-    def FullLookAhead(node: CSPNode, constraints: CSPConstraints, tree_depth: int, last_assigned_variable_name: str, target):
-        if target: print("Applico l'algoritmo Full Look Ahead...", file = target)
+    def FullLookAhead(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]):
 
         variable = node.get_variable_by_name(last_assigned_variable_name)
 
-        if not CSPAlgorithm.ForwardChecking(node, constraints, tree_depth, last_assigned_variable_name, target):
+        if not Algorithm.ForwardChecking(node, constraints, tree_depth, last_assigned_variable_name, target):
             return False
+        
+        if target: print("Applico l'algoritmo Full Look Ahead...", file = target)
 
         for variable_not_assigned in [v for v in node.get_variables() if not v.value]:
             for value in variable_not_assigned.domain[:]:
