@@ -4,8 +4,41 @@ from .constraints import Constraints
 from .variable import Variable
 
 class Algorithm:
+    """
+    Ad ogni passo di risoluzione viene applicata una funzione
+    che ha lo scopo di verificare se gli assegnamernti effettutati sono validi ed
+    eventualmente di modificare i domini delle variabili,
+    tale funzione è caratterizzata dall'interfaccia:
+
+    Parametri
+    -------
+    node : cspsolver.node.Node
+        La situazione attuale del problema (variabili e domini),
+        il dominio delle variabili può essere modificato
+    constraints : cspsolver.constraints.Constraints
+        I vincoli del problema
+    tree_depth: int
+        L'attuale profondità dell'albero di decisione,
+        corrisponde anche al numero di variabili già assegnate
+    last_assigned_variable_name: str
+        Il nome dell'ultima variabile assegnata
+    target: TextIO
+        Dove stampare l'output (es. sys.stdout)
+
+    Restituisce
+    -------
+    bool
+        True se l'algoritmo ha successo, altrimenti False
+    """
+
     @staticmethod
-    def GenerateAndTest(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]):
+    def GenerateAndTest(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]) -> bool:
+        """
+        La funzione ha successo ad ogni passo (Generate) eccetto l'ultimo,
+        nel quale vengono testate le assegnaziononi effettuate (Test),
+        se ci sono incompatibilità restituisce False
+        """
+
         if target: print("Applico l'algoritmo Generate and Test...", file = target)
 
         if tree_depth + 1 == len(node.get_variables()):
@@ -22,7 +55,12 @@ class Algorithm:
         return True
 
     @staticmethod
-    def StandardBacktracking(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]):
+    def StandardBacktracking(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]) -> bool:
+        """
+        Ad ogni passo (assegnamento) viene testata la compatibilità dell'ultima variabile assegnata
+        con le variabili assegnate precedentemente, se ci sono incompatibilità restituisce False
+        """
+
         if target: print("Applico l'algoritmo Standard Backtracking...", file = target)
 
         variable = node.get_variable_by_name(last_assigned_variable_name)
@@ -39,7 +77,13 @@ class Algorithm:
         return True
 
     @staticmethod
-    def ForwardChecking(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]):
+    def ForwardChecking(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]) -> bool:
+        """
+        Ad ogni passo (assegnamento) elimino dai domini delle variabili non ancora assegnate
+        i valori non compatibili con l'ultima variabile assegnata.
+        Se rimangono domini vuoti la funzione restituisce False
+        """
+
         if target: print("Applico l'algoritmo Forward Checking...", file = target)
 
         variable = node.get_variable_by_name(last_assigned_variable_name)
@@ -61,7 +105,13 @@ class Algorithm:
         return True
 
     @staticmethod
-    def PartialLookAhead(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]):
+    def PartialLookAhead(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]) -> bool:
+        """
+        Ad ogni passo (assegnamento) applico il forward checking,
+        successivamente per ogni variabile non assegnata elimino i valori che non sono compatibili
+        con nessuno dei valori delle variabili non assegnate successive.
+        Se rimangono domini vuoti la funzione restituisce False
+        """
             
         variable = node.get_variable_by_name(last_assigned_variable_name)
 
@@ -92,7 +142,13 @@ class Algorithm:
         return True
         
     @staticmethod
-    def FullLookAhead(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]):
+    def FullLookAhead(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]) -> bool:
+        """
+        Ad ogni passo (assegnamento) applico il forward checking,
+        successivamente per ogni variabile non assegnata elimino i valori che non sono compatibili
+        con nessuno dei valori delle altre variabili non assegnate.
+        Se rimangono domini vuoti la funzione restituisce False
+        """
 
         variable = node.get_variable_by_name(last_assigned_variable_name)
 

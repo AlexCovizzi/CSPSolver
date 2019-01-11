@@ -11,6 +11,21 @@ from .variable import Variable
 
 
 def draw_constraint_graph(solver: CSPSolver, target = "constraint_graph.pdf"):
+    """
+    Disegna il constraint graph del problema passato come parametro.
+    Il grafo è costituito da un nodo per ogni variabile del problema,
+    e da un arco tra i nodi Ni e Nj se e solo se esiste almeno un vincolo tra
+    le variabili Vi e Vj, per i vincoli unari l'arco inizia e finisce sullo stesso nodo.
+
+    Parametri
+    -------
+    solver : cspsolver.CSPSolver
+        Il problema che vogliamo graficare
+    target: str
+        Il nome del file di output,
+        le estensioni supportate sono: png, svg, pdf (default)
+    """
+
     graph = Graph()
 
     graph.add_vertices(len(solver._root.get_variables()))
@@ -35,6 +50,25 @@ def draw_constraint_graph(solver: CSPSolver, target = "constraint_graph.pdf"):
 
 
 def draw_decision_tree(solver: CSPSolver, print_domains=False, target = "decision_tree.pdf"):
+    """
+    Disegna il decision tree del problema passato come parametro, partendo dal nodo radice.
+    In ogni ramo è scritta l'assegnazione effettuata, inoltre ogni nodo può essere di uno di tre colori:
+    verde se il nodo è una soluzione, rosso se il nodo è di fallimento, altrimenti giallo.
+    
+    Parametri
+    -------
+    solver : cspsolver.CSPSolver
+        Il problema il cui albero decisionale vogliamo graficare.
+    print_domains : bool
+        False: i nodi vengono rappresentati senza domini 
+               e sono identificati da un numero
+        True: i nodi vengono rappresentati con le variabili e i loro domini
+              (per problemi con molte variabili o domini molto ampi è sconsigliata questa modalità)
+    target: str
+        Il nome del file di output,
+        le estensioni supportate sono: png, svg, pdf (default)
+    """
+
     node = solver._root
     graph = Graph()
 
