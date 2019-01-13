@@ -25,7 +25,7 @@ class Algorithm:
     target: TextIO
         Dove stampare l'output (es. sys.stdout)
 
-    Restituisce
+    Return
     -------
     bool
         True se l'algoritmo ha successo, altrimenti False

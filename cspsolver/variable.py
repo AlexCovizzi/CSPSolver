@@ -7,7 +7,8 @@ class Variable:
         self.value = None
     
     def assign_value(self, value):
-        self.value = value
+        if value in self.domain:
+            self.value = value
     
     def delete_value(self, value):
         if value in self.domain:

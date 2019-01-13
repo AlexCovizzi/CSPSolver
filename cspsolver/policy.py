@@ -19,7 +19,7 @@ class Policy:
         L'attuale profondità dell'albero di decisione,
         corrisponde anche al numero di variabili già assegnate
 
-    Restituisce
+    Return
     -------
     cspsolver.variable.Variable
         La variabile da assegnare
