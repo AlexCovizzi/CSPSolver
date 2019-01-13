@@ -1,15 +1,18 @@
 from typing import Union, Callable, Dict, Tuple, List, Any, NewType
 
 class Constraints:
+
     def __init__(self):
         self._constraints : Dict[Union[Tuple[str], Tuple[str, str]], List[Callable]] = {}
 
+    # aggiungi un vincolo unario o binario
     def add_constraint(self, variables: Union[Tuple[str], Tuple[str, str]], constraint: Callable):
         if not variables in self._constraints.keys():
             self._constraints[variables] = []
 
         self._constraints[variables].append(constraint)
 
+    # verifica se i valori delle variabili soddisfano i vincoli
     def verify(self, values: Dict[str, Any]):
         n_keys = len(values.keys())
 
@@ -35,12 +38,14 @@ class Constraints:
         
         return True
     
+    # restituisce i vincoli unari della variabili passatata come parametro
     def get_unary_constraints(self, variable_name):
         if (variable_name,) in self._constraints.keys():
             return self._constraints[(variable_name,)]
         else:
             return []
 
+    # restituisce i vincoli binari tra le variabili passatate come parametro
     def get_binary_constraints(self, variable_name_1, variable_name_2):
         constraints_12 = []
         constraints_21 = []
@@ -51,6 +56,7 @@ class Constraints:
         
         return (constraints_12, constraints_21)
 
+    # restituisce tutti i vincoli unari e binari che includono la variabile passata come parametro
     def get_variable_constraints(self, variable_name):
         constraints_list = [item[1] for item in list(self._constraints.items()) if variable_name in item[0]]
         return [constraint for constraints in constraints_list for constraint in constraints]
