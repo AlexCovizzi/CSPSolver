@@ -1,23 +1,23 @@
-from typing import List
+from typing import List, Optional
 from collections import OrderedDict
-from CSPVariable import CSPVariable
+from .variable import Variable
 
-class CSPNode:
-    def __init__(self, parent: "CSPNode", variables: List[CSPVariable]):
-        self._variables: OrderedDict[str, CSPVariable] = {}
+class Node:
+    def __init__(self, parent: Optional["Node"], variables: List[Variable]):
+        self._variables: OrderedDict[str, Variable] = OrderedDict()
         self.parent = parent
-        self.children = []
+        self.children: List[Node] = []
         self.solution = False
         self.failure = False
-        self._last_assigned_variable_name = None
+        self._last_assigned_variable_name: Optional[str] = None
 
         for variable in variables:
             self.add_variable(variable)
 
-    def add_variable(self, variable: CSPVariable):
+    def add_variable(self, variable: Variable):
         self._variables[variable.name] = variable
     
-    def add_child(self, child: "CSPNode"):
+    def add_child(self, child: "Node"):
         self.children.append(child)
 
     def get_variables(self):

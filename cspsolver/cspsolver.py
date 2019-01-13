@@ -1,32 +1,28 @@
-from typing import Callable, Dict, Tuple, List
+from typing import Callable, Dict, Tuple, List, TextIO, Union, Any, Optional
 import sys
 from copy import deepcopy
-from CSPNode import CSPNode
-from CSPConstraints import CSPConstraints
-from CSPVariable import CSPVariable
-from CSPAlgorithm import CSPAlgorithm
-from CSPPolicy import CSPPolicy
+from .node import Node
+from .constraints import Constraints
+from .variable import Variable
+from .algorithm import Algorithm
+from .policy import Policy
 
 class CSPSolver:
     # init
-    def __init__(self, algorithm: Callable[[CSPNode, CSPConstraints, int, str], bool] = CSPAlgorithm.StandardBacktracking,
-                 policy: Callable[[CSPNode, int], bool] = CSPPolicy.InsertOrder,
+    def __init__(self, algorithm: Callable[[Node, Constraints, int, str, Optional[TextIO]], bool] = Algorithm.StandardBacktracking,
+                 policy: Callable[[Node, Constraints, int], Variable] = Policy.InsertOrder,
                  step_arc_consistency: bool = False):
-        self._constraints: CSPConstraints = CSPConstraints()
-        self._root = CSPNode(None, [])
-        self._solutions: List[CSPNode] = []
+        self._constraints: Constraints = Constraints()
+        self._root = Node(None, [])
+        self._solutions: List[Node] = []
         self._found_solution = False
         self._algorithm = algorithm
         self._policy = policy
         self._step_arc_consistency = step_arc_consistency
-        self.is_node_consistent = False
+        self._is_node_consistent = False
         
     # Add a constraint
-    def add_constraint(self, variables: Tuple[str, ...], constraint: Callable):
-        variables_len = len(variables)
-        if variables_len > 2:
-            raise ValueError("Too many variables (max 2)")
-        
+    def add_constraint(self, variables: Union[Tuple[str], Tuple[str, str]], constraint: Callable):
         # Are there variables not in this problem?
         for v in variables:
             if not self._root.get_variable_by_name(v):
@@ -36,19 +32,18 @@ class CSPSolver:
 
     # Add a variable
     def add_variable(self, name: str, domain: List):
-        new_variable = CSPVariable(name, domain)
+        new_variable = Variable(name, domain)
         self._root.add_variable(new_variable)
 
-    def _next_step(self, current_node: CSPNode, tree_depth: int, one_solution: bool, target):
+    def _next_step(self, current_node: Node, tree_depth: int, one_solution: bool, target: Optional[TextIO]):
         # assegno la variabile e faccio uno snapshot delle variabili
         # in questo modo se quella assegnazione fallisce, posso tornare allo snapshot
         variable = self._policy(current_node, self._constraints, tree_depth)
         
         # ciclo sui valori della variabile da assegnare
         for value in variable.domain:
-
             # Costruiamo il prossimo nodo
-            child_node = CSPNode(current_node, deepcopy(current_node.get_variables()))
+            child_node = Node(current_node, deepcopy(current_node.get_variables()))
             current_node.add_child(child_node)
 
             # Assegna un valore alla variabile da assegnare
@@ -82,13 +77,12 @@ class CSPSolver:
                 if target: print(f"Assegnamento {variable.name} = {value} fallito", file = target)
                 child_node.set_failure()
     
-    def solve(self, one_solution: bool = True, target = None):
+    def solve(self, one_solution: bool = True, target: Optional[TextIO] = None):
         if target: print(str(self._root), file = target)
 
         self._next_step(self._root, 0, one_solution, target)
-        
     
-    def apply_arc_consistency(self, node: CSPNode=None, target = None):
+    def apply_arc_consistency(self, node: Optional[Node]=None, target: Optional[TextIO] = None):
         if target: print("Applico arc-consistency...", file = target)
 
         if not node:
@@ -132,7 +126,7 @@ class CSPSolver:
         if target: print("Le variabili sono arc-consistenti.", file = target)
         return True
 
-    def apply_node_consistency(self, node: CSPNode=None, target = None):
+    def apply_node_consistency(self, node: Optional[Node] = None, target: Optional[TextIO] = None):
         if target: print("Applico node-consistency...", file = target)
         if not node:
             node = self._root
@@ -152,17 +146,17 @@ class CSPSolver:
     def __str__(self):
         return "Nodo radice del problema:\n" + str(self._root)
 
-    def print_tree(self, target = sys.stdout):
+    def print_decision_tree(self, target: TextIO = sys.stdout):
         self._print_node(self._root, 0, target)
         
-    def _print_node(self, node: CSPNode, index: int, target):
+    def _print_node(self, node: Node, index: int, target: TextIO = sys.stdout):
         print(str(index) + " - " + str(node), file = target)
         index += 1
         for child in node.get_children():
             index = self._print_node(child, index, target)
         return index
     
-    def print_solutions(self, target = sys.stdout):
+    def print_solutions(self, target: TextIO = sys.stdout):
         if self._solutions:
             print("Le soluzioni trovate sono:", file = target)
             for solution in self._solutions:

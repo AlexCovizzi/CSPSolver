@@ -1,6 +1,6 @@
 from typing import List
 
-class CSPVariable:
+class Variable:
     def __init__(self, name: str, domain: List):
         self.name = name
         self.domain = domain
@@ -12,6 +12,11 @@ class CSPVariable:
     def delete_value(self, value):
         if value in self.domain:
             self.domain.remove(value)
+
+    # null variable (no name, no domain)
+    @staticmethod
+    def Null() -> "Variable":
+        return Variable("", [])
 
     def __str__(self):
         if self.value:

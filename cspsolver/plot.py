@@ -1,15 +1,31 @@
-from igraph import *
-from igraph.drawing import *
-from igraph.drawing.graph import AbstractCairoGraphDrawer, AttributeCollectorBase
-from igraph.drawing.vertex import *
+from igraph import Graph, plot
+from igraph.drawing import DefaultGraphDrawer
+from igraph.drawing.graph import AbstractCairoGraphDrawer, AttributeCollectorBase, pi
+from igraph.drawing.vertex import DefaultVertexDrawer
 from igraph.drawing.shapes import *
-from igraph.drawing.edge import *
-from igraph.drawing.text import *
-from CSPSolver import CSPSolver
-from CSPNode import CSPNode
-from CSPVariable import CSPVariable
-        
+from igraph.drawing.edge import ArrowEdgeDrawer
+from igraph.drawing.text import TextDrawer
+from .cspsolver import CSPSolver
+from .node import Node
+from .variable import Variable
+
+
 def draw_constraint_graph(solver: CSPSolver, target = "constraint_graph.pdf"):
+    """
+    Disegna il constraint graph del problema passato come parametro.
+    Il grafo è costituito da un nodo per ogni variabile del problema,
+    e da un arco tra i nodi Ni e Nj se e solo se esiste almeno un vincolo tra
+    le variabili Vi e Vj, per i vincoli unari l'arco inizia e finisce sullo stesso nodo.
+
+    Parametri
+    -------
+    solver : cspsolver.CSPSolver
+        Il problema che vogliamo graficare
+    target: str
+        Il nome del file di output,
+        le estensioni supportate sono: png, svg, pdf (default)
+    """
+
     graph = Graph()
 
     graph.add_vertices(len(solver._root.get_variables()))
@@ -33,8 +49,26 @@ def draw_constraint_graph(solver: CSPSolver, target = "constraint_graph.pdf"):
     plot(graph, target = target, **visual_style)
 
 
+def draw_decision_tree(solver: CSPSolver, print_domains=False, target = "decision_tree.pdf"):
+    """
+    Disegna il decision tree del problema passato come parametro, partendo dal nodo radice.
+    In ogni ramo è scritta l'assegnazione effettuata, inoltre ogni nodo può essere di uno di tre colori:
+    verde se il nodo è una soluzione, rosso se il nodo è di fallimento, altrimenti giallo.
+    
+    Parametri
+    -------
+    solver : cspsolver.CSPSolver
+        Il problema il cui albero decisionale vogliamo graficare.
+    print_domains : bool
+        False: i nodi vengono rappresentati senza domini 
+               e sono identificati da un numero
+        True: i nodi vengono rappresentati con le variabili e i loro domini
+              (per problemi con molte variabili o domini molto ampi è sconsigliata questa modalità)
+    target: str
+        Il nome del file di output,
+        le estensioni supportate sono: png, svg, pdf (default)
+    """
 
-def draw_decision_tree(solver: CSPSolver, target = "decision_tree.pdf", print_domains=False):
     node = solver._root
     graph = Graph()
 
@@ -59,7 +93,7 @@ def draw_decision_tree(solver: CSPSolver, target = "decision_tree.pdf", print_do
 
     layout = graph.layout_reingold_tilford(root=[0])
 
-    visual_style = {}
+    visual_style: dict = {}
     n_leaf = graph.vcount() - sum([1 for n in graph.vs["state"] if n == "normal"])
 
     margin = 70
@@ -71,7 +105,6 @@ def draw_decision_tree(solver: CSPSolver, target = "decision_tree.pdf", print_do
         visual_style["vertex_height"] = (font_size + 2) * len(node.get_variables())
         visual_style["vertex_label_size"] = font_size
         visual_style["bbox"] = (n_leaf * (visual_style["vertex_width"] + 20) + margin, (visual_style["vertex_height"] + 70) * len(node.get_variables()))
-        
     else:
         variables_length = max([max([len(str(val)) for val in v.domain], default = 0) + 3 + len(v.name) for v in node.get_variables()])
         visual_style["vertex_width"] = 20
@@ -90,7 +123,7 @@ def draw_decision_tree(solver: CSPSolver, target = "decision_tree.pdf", print_do
     plot(graph, target = target, **visual_style)
 
 
-def _generate_graph(graph, node: CSPNode, parent_vertex_id: int, print_domains):
+def _generate_graph(graph, node: Node, parent_vertex_id: int, print_domains):
     graph.add_vertices(1)
     node_vertex_id = graph.vcount() - 1
 
@@ -107,7 +140,11 @@ def _generate_graph(graph, node: CSPNode, parent_vertex_id: int, print_domains):
         graph.vs[node_vertex_id]["state"] = "normal"
 
     graph.add_edges([(parent_vertex_id, node_vertex_id)])
-    assigned_variable = node.get_variable_by_name(node._last_assigned_variable_name)
+
+    assigned_variable = None
+    if node._last_assigned_variable_name:
+        assigned_variable = node.get_variable_by_name(node._last_assigned_variable_name)
+
     if assigned_variable:
         graph.es[node_vertex_id - 1]["label"] = " " + assigned_variable.name + " = " + str(assigned_variable.value)
     else:
