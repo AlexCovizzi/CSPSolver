@@ -107,6 +107,7 @@ def draw_decision_tree(solver: CSPSolver, print_domains=False, target = "decisio
         visual_style["bbox"] = (n_leaf * (visual_style["vertex_width"] + 20) + margin, (visual_style["vertex_height"] + 70) * len(node.get_variables()))
     else:
         variables_length = max([max([len(str(val)) for val in v.domain], default = 0) + 3 + len(v.name) for v in node.get_variables()])
+        margin += variables_length
         visual_style["vertex_width"] = 20
         visual_style["vertex_height"] = 20
         visual_style["vertex_label_size"] = 14
