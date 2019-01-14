@@ -4,6 +4,7 @@ setup(
     name='cspsolver',
     version='1.0',
     python_requires='>=3.6',
+    packages=find_packages(),
     install_requires=[
         'pycairo; platform_system=="Linux"',
         'pycairo @ https://download.lfd.uci.edu/pythonlibs/r5uhg2lo/pycairo-1.18.0-cp36-cp36m-win_amd64.whl ;python_version<"3.7" and platform_system=="Windows" and platform_machine=="AMD64"',
