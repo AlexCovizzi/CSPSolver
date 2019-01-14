@@ -7,7 +7,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         # pycairo
-        'pycairo; platform_system=="Linux"',
+        'pycairo; platform_system!="Windows"',
         # pycairo Windows 3.5
         'pycairo @ https://download.lfd.uci.edu/pythonlibs/r5uhg2lo/pycairo-1.18.0-cp35-cp35m-win32.whl ;python_version=="3.5" and platform_system=="Windows" and platform_machine=="x86_64"',
         'pycairo @ https://download.lfd.uci.edu/pythonlibs/r5uhg2lo/pycairo-1.18.0-cp35-cp35m-win_amd64.whl ;python_version=="3.5" and platform_system=="Windows" and platform_machine=="AMD64"',
@@ -18,7 +18,7 @@ setup(
         'pycairo @ https://download.lfd.uci.edu/pythonlibs/r5uhg2lo/pycairo-1.18.0-cp37-cp37m-win32.whl ;python_version>="3.7" and platform_system=="Windows" and platform_machine=="x86_64"',
         'pycairo @ https://download.lfd.uci.edu/pythonlibs/r5uhg2lo/pycairo-1.18.0-cp37-cp37m-win_amd64.whl ;python_version>="3.7" and platform_system=="Windows" and platform_machine=="AMD64"',
         # python-igraph
-        'python-igraph; platform_system=="Linux"',
+        'python-igraph; platform_system!="Windows"',
         # python-igraph Windows 3.5
         'python-igraph @ https://download.lfd.uci.edu/pythonlibs/r5uhg2lo/python_igraph-0.7.1.post6-cp35-cp35m-win32.whl ;python_version=="3.5" and platform_system=="Windows" and platform_machine=="x86_64"',
         'python-igraph @ https://download.lfd.uci.edu/pythonlibs/r5uhg2lo/python_igraph-0.7.1.post6-cp35-cp35m-win_amd64.whl ;python_version=="3.5" and platform_system=="Windows" and platform_machine=="AMD64"',
