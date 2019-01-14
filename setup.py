@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='cspsolver',
     version='1.0',
-    python_requires='>=3.6',
+    python_requires='>=3.5',
     packages=find_packages(),
     install_requires=[
         # pycairo
