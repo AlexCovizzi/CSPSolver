@@ -9,7 +9,7 @@ class Node:
         self.children: List[Node] = []
         self.solution = False
         self.failure = False
-        self._last_assigned_variable_name: Optional[str] = None
+        self._last_assigned_variable: Variable = Variable.Null()
 
         for variable in variables:
             self.add_variable(variable)
@@ -28,8 +28,8 @@ class Node:
 
     # assegna un valore ad una variabile
     def assign_variable(self, name: str, value):
-        self._last_assigned_variable_name = name
-        self.get_variable_by_name(name).assign_value(value)
+        self._last_assigned_variable = self.get_variable_by_name(name)
+        self._last_assigned_variable.assign_value(value)
 
     # restituisce una variabile dato il nome
     def get_variable_by_name(self, name : str):
@@ -38,6 +38,9 @@ class Node:
     # restituisce una variabile dato l'indice
     def get_variable_by_index(self, index : int):
         return list(self._variables.items())[index][1]
+
+    def get_last_assigned_variable(self) -> Variable:
+        return self._last_assigned_variable
 
     # restituisce i nodi figli
     def get_children(self):

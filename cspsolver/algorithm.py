@@ -3,6 +3,9 @@ from .node import Node
 from .constraints import Constraints
 from .variable import Variable
 
+str_value_not_compatible = "{not_assigned} = {not_assigned_value} non e' compatibile con {variable} = {value} -> Nuovo dominio di {not_assigned}: {not_assigned_domain}"
+str_var_not_compatible = "{not_assigned} = {not_assigned_value} non e' compatibile con i valori di {variable} -> Nuovo dominio di {not_assigned}: {not_assigned_domain}"
+
 class Algorithm:
     """
     Ad ogni passo di risoluzione viene applicata una funzione
@@ -20,8 +23,6 @@ class Algorithm:
     tree_depth: int
         L'attuale profondità dell'albero di decisione,
         corrisponde anche al numero di variabili già assegnate
-    last_assigned_variable_name: str
-        Il nome dell'ultima variabile assegnata
     target: TextIO
         Dove stampare l'output (es. sys.stdout)
 
@@ -32,7 +33,7 @@ class Algorithm:
     """
 
     @staticmethod
-    def GenerateAndTest(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]) -> bool:
+    def GenerateAndTest(node: Node, constraints: Constraints, tree_depth: int, target: Optional[TextIO]) -> bool:
         """
         La funzione ha successo ad ogni passo (Generate) eccetto l'ultimo,
         nel quale vengono testate le assegnaziononi effettuate (Test),
@@ -55,7 +56,7 @@ class Algorithm:
         return True
 
     @staticmethod
-    def StandardBacktracking(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]) -> bool:
+    def StandardBacktracking(node: Node, constraints: Constraints, tree_depth: int, target: Optional[TextIO]) -> bool:
         """
         Ad ogni passo (assegnamento) viene testata la compatibilità dell'ultima variabile assegnata
         con le variabili assegnate precedentemente, se ci sono incompatibilità restituisce False
@@ -63,7 +64,7 @@ class Algorithm:
 
         if target: print("Applico l'algoritmo Standard Backtracking...", file = target)
 
-        variable = node.get_variable_by_name(last_assigned_variable_name)
+        variable = node.get_last_assigned_variable()
         # verifico vincoli unari
         if not constraints.verify({variable.name: variable.value}):
             return False
@@ -77,7 +78,7 @@ class Algorithm:
         return True
 
     @staticmethod
-    def ForwardChecking(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]) -> bool:
+    def ForwardChecking(node: Node, constraints: Constraints, tree_depth: int, target: Optional[TextIO]) -> bool:
         """
         Ad ogni passo (assegnamento) elimino dai domini delle variabili non ancora assegnate
         i valori non compatibili con l'ultima variabile assegnata.
@@ -86,7 +87,7 @@ class Algorithm:
 
         if target: print("Applico l'algoritmo Forward Checking...", file = target)
 
-        variable = node.get_variable_by_name(last_assigned_variable_name)
+        variable = node.get_last_assigned_variable()
         # verifico vincoli unari
         if not constraints.verify({variable.name: variable.value}):
             return False
@@ -96,8 +97,10 @@ class Algorithm:
                 if not constraints.verify({variable.name: variable.value, variable_not_assigned.name: value}):
                     variable_not_assigned.delete_value(value)
 
-                    if target: print(f"{variable_not_assigned.name} = {value} non e' compatibile con {variable.name} = {variable.value}" +
-                                        f" -> Nuovo dominio di {variable_not_assigned.name}: {variable_not_assigned.domain}", file = target)
+                    if target:
+                        data = {"not_assigned": variable_not_assigned.name, "not_assigned_value": value,
+                                "variable": variable.name, "value": variable.value, "not_assigned_domain": variable_not_assigned.domain}
+                        print(str_value_not_compatible.format(**data), file = target)
             
             if not variable_not_assigned.domain:
                 return False
@@ -105,7 +108,7 @@ class Algorithm:
         return True
 
     @staticmethod
-    def PartialLookAhead(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]) -> bool:
+    def PartialLookAhead(node: Node, constraints: Constraints, tree_depth: int, target: Optional[TextIO]) -> bool:
         """
         Ad ogni passo (assegnamento) applico il forward checking,
         successivamente per ogni variabile non assegnata elimino i valori che non sono compatibili
@@ -113,9 +116,9 @@ class Algorithm:
         Se rimangono domini vuoti la funzione restituisce False
         """
             
-        variable = node.get_variable_by_name(last_assigned_variable_name)
+        variable = node.get_last_assigned_variable()
 
-        if not Algorithm.ForwardChecking(node, constraints, tree_depth, last_assigned_variable_name, target):
+        if not Algorithm.ForwardChecking(node, constraints, tree_depth, target):
             return False
             
         if target: print("Applico l'algoritmo Partial Look Ahead...", file = target)
@@ -133,8 +136,10 @@ class Algorithm:
                     if delete_value:
                         variable_not_assigned.delete_value(value)
 
-                        if target: print(f"{variable_not_assigned.name} = {value} non e' compatibile con i valori di {next_variable_not_assigned.name}" +
-                                            f" -> Nuovo dominio di {variable_not_assigned.name}: {variable_not_assigned.domain}", file = target)
+                        if target:
+                            data = {"not_assigned": variable_not_assigned.name, "not_assigned_value": value,
+                                    "variable": next_variable_not_assigned.name, "not_assigned_domain": variable_not_assigned.domain}
+                            print(str_var_not_compatible.format(**data), file = target)
 
                     if not variable_not_assigned.domain:
                         return False
@@ -142,7 +147,7 @@ class Algorithm:
         return True
         
     @staticmethod
-    def FullLookAhead(node: Node, constraints: Constraints, tree_depth: int, last_assigned_variable_name: str, target: Optional[TextIO]) -> bool:
+    def FullLookAhead(node: Node, constraints: Constraints, tree_depth: int, target: Optional[TextIO]) -> bool:
         """
         Ad ogni passo (assegnamento) applico il forward checking,
         successivamente per ogni variabile non assegnata elimino i valori che non sono compatibili
@@ -150,9 +155,9 @@ class Algorithm:
         Se rimangono domini vuoti la funzione restituisce False
         """
 
-        variable = node.get_variable_by_name(last_assigned_variable_name)
+        variable = node.get_last_assigned_variable()
 
-        if not Algorithm.ForwardChecking(node, constraints, tree_depth, last_assigned_variable_name, target):
+        if not Algorithm.ForwardChecking(node, constraints, tree_depth, target):
             return False
         
         if target: print("Applico l'algoritmo Full Look Ahead...", file = target)
@@ -170,8 +175,10 @@ class Algorithm:
                     if delete_value:
                         variable_not_assigned.delete_value(value)
 
-                        if target: print(f"{variable_not_assigned.name} = {value} non e' compatibile con i valori di {next_variable_not_assigned.name}" +
-                                            f" -> Nuovo dominio di {variable_not_assigned.name}: {variable_not_assigned.domain}", file = target)
+                        if target:
+                            data = {"not_assigned": variable_not_assigned.name, "not_assigned_value": value,
+                                    "variable": next_variable_not_assigned.name, "not_assigned_domain": variable_not_assigned.domain}
+                            print(str_var_not_compatible.format(**data), file = target)
 
                     if not variable_not_assigned.domain:
                         return False

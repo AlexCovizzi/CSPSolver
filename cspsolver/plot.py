@@ -142,11 +142,9 @@ def _generate_graph(graph, node: Node, parent_vertex_id: int, print_domains):
 
     graph.add_edges([(parent_vertex_id, node_vertex_id)])
 
-    assigned_variable = None
-    if node._last_assigned_variable_name:
-        assigned_variable = node.get_variable_by_name(node._last_assigned_variable_name)
+    assigned_variable = node.get_last_assigned_variable()
 
-    if assigned_variable:
+    if assigned_variable.name:
         graph.es[node_vertex_id - 1]["label"] = " " + assigned_variable.name + " = " + str(assigned_variable.value)
     else:
         graph.es[node_vertex_id - 1]["label"] = ""

@@ -207,7 +207,7 @@ class CSPSolver:
                 if not self._constraints.verify({variable.name: value}):
                     variable.delete_value(value)
                     if not variable.domain:
-                        if target: print(f"La variabile {variable.name} non è node-consistente.", file = target)
+                        if target: print("La variabile {variable} non è node-consistente.".format(variable=variable.name), file = target)
                         return False
                 
         self.is_node_consistent = True
@@ -255,8 +255,12 @@ class CSPSolver:
                         if not self._constraints.verify({variable_1.name: variable_1.value, variable_2.name: value_2}):
                             variable_2.delete_value(value_2)
 
-                            if target: print(f"{variable_2.name} = {value_2} non e' compatibile con {variable_1.name} = {variable_1.value}" +
-                                                f" -> Nuovo dominio di {variable_2.name}: {variable_2.domain}", file = target)
+                            if target:
+                                data = {"assigned": variable_1.name, "assigned_value": variable_1.value,
+                                        "not_assigned": variable_2.name, "not_assigned_value": value_2, "not_assigned_domain": variable_2.domain}
+                                s = "{not_assigned} = {not_assigned_value} non e' compatibile con {assigned} = {assigned_value}" + \
+                                    " -> Nuovo dominio di {not_assigned}: {not_assigned_domain}"
+                                print(s.format(**data) , file = target)
 
                             if not variable_2.domain:
                                 if target: print("Le variabili non sono arc-consistenti.", file = target)
@@ -273,8 +277,11 @@ class CSPSolver:
                         if delete_value:
                             variable_1.delete_value(value_1)
 
-                            if target: print(f"{variable_1.name} = {value_1} non e' compatibile con i valori di {variable_2.name}" +
-                                                f" -> Nuovo dominio di {variable_1.name}: {variable_1.domain}", file = target)
+                            if target:
+                                data = {"var1": variable_1.name, "var1_value": value_1, "var1_domain": variable_1.domain,
+                                        "var2": variable_2.name}
+                                s = "{var1} = {var1_value} non e' compatibile con {var2} -> Nuovo dominio di {var1}: {var1_domain}"
+                                print(s.format(**data) , file = target)
                     
                         if not variable_1.domain:
                             if target: print("Le variabili non sono arc-consistenti.", file = target)
@@ -297,13 +304,13 @@ class CSPSolver:
             # Assegna un valore alla variabile da assegnare
             child_node.assign_variable(variable.name, value)
 
-            if target: print(f"Assegno: {variable.name} = {value}", file = target)
+            if target: print("Assegno: {variable} = {value}".format(variable=variable.name, value=value), file = target)
 
             # Algoritmo applicato al child node: i domini delle variabili non assegnate verranno modificati (a seconda dell"algoritmo scelto)
-            if self._algorithm(child_node, self._constraints, tree_depth, variable.name, target):
+            if self._algorithm(child_node, self._constraints, tree_depth, target):
                 if self._step_arc_consistency:
                     if not self.apply_arc_consistency(child_node, target):
-                        if target: print(f"Assegnamento {variable.name} = {value} fallito", file = target)
+                        if target: print("Assegnamento {variable} = {value} fallito".format(variable=variable.name, value=value), file = target)
                         child_node.set_failure()
                         continue
                 
@@ -322,7 +329,7 @@ class CSPSolver:
                         break
             else:
                 # Descrizione del fallimento
-                if target: print(f"Assegnamento {variable.name} = {value} fallito", file = target)
+                if target: print("Assegnamento {variable} = {value} fallito".format(variable=variable.name, value=variable.value), file = target)
                 child_node.set_failure()
 
     def __str__(self):
