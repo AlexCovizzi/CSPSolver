@@ -44,7 +44,7 @@ requirements_64 = [
 setup(
     name='cspsolver',
     version='1.0',
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     packages=find_packages(),
     install_requires = requirements_32 if python_arch=="32bit" else requirements_64,
     extras_require={
