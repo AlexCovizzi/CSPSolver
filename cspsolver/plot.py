@@ -49,7 +49,7 @@ def draw_constraint_graph(solver: CSPSolver, target = "constraint_graph.pdf"):
     plot(graph, target = target, **visual_style)
 
 
-def draw_decision_tree(solver: CSPSolver, print_domains=False, target = "decision_tree.pdf"):
+def draw_decision_tree(solver: CSPSolver, target = "decision_tree.pdf", print_domains=False):
     """
     Disegna il decision tree del problema passato come parametro, partendo dal nodo radice.
     In ogni ramo è scritta l'assegnazione effettuata, inoltre ogni nodo può essere di uno di tre colori:

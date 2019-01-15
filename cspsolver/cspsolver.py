@@ -63,6 +63,7 @@ class CSPSolver:
         self._policy = policy
         self._step_arc_consistency = step_arc_consistency
         self._is_node_consistent = False
+        self._is_solved = False
 
     # Add a variable
     def add_variable(self, name: str, domain: List):
@@ -101,7 +102,7 @@ class CSPSolver:
             dominio delle variabili da aggiungere.
         """
         for name in names:
-            self.add_variable(name, domain)
+            self.add_variable(name, domain[:])
         
     def add_constraint(self, variables: Union[Tuple[str], Tuple[str, str]], constraint: Callable):
         """
@@ -169,9 +170,11 @@ class CSPSolver:
             Restituisce la lista delle soluzioni o
             una lista vuota se non ci sono soluzioni
         """
-        if target: print(str(self._root), file = target)
-
-        self._next_step(self._root, 0, one_solution, target)
+        
+        if not self._is_solved:
+            if target: print(str(self._root), file = target)
+            self._next_step(self._root, 0, one_solution, target)
+            self._is_solved = True
 
         return self._solutions
     
@@ -206,11 +209,14 @@ class CSPSolver:
             for value in variable.domain[:]:
                 if not self._constraints.verify({variable.name: value}):
                     variable.delete_value(value)
+                    if target: print(f"{variable.name} = {value} non e' compatibile con i vincoli unari" + \
+                                    f" -> Nuovo dominio di {variable.name}: {variable.domain}", file = target)
+                    
                     if not variable.domain:
                         if target: print("La variabile {variable} non è node-consistente.".format(variable=variable.name), file = target)
                         return False
                 
-        self.is_node_consistent = True
+        self._is_node_consistent = True
 
         if target: print("Le variabili sono node-consistenti.", file = target)
 
@@ -243,8 +249,8 @@ class CSPSolver:
         if not node:
             node = self._root
         
-        if not self.is_node_consistent:
-            if not self.apply_node_consistency(node):
+        if not self._is_node_consistent:
+            if not self.apply_node_consistency(node, target):
                 return False
 
         for variable_1 in node.get_variables():
@@ -331,6 +337,9 @@ class CSPSolver:
                 # Descrizione del fallimento
                 if target: print("Assegnamento {variable} = {value} fallito".format(variable=variable.name, value=variable.value), file = target)
                 child_node.set_failure()
+
+    def get_root(self) -> Node:
+        return self._root
 
     def __str__(self):
         return "Nodo radice del problema:\n" + str(self._root)
