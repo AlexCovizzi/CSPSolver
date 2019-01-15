@@ -102,7 +102,7 @@ class CSPSolver:
             dominio delle variabili da aggiungere.
         """
         for name in names:
-            self.add_variable(name, domain[:])
+            self.add_variable(name, deepcopy(domain))
         
     def add_constraint(self, variables: Union[Tuple[str], Tuple[str, str]], constraint: Callable):
         """
@@ -209,13 +209,15 @@ class CSPSolver:
                 if not self._constraints.verify({variable.name: value}):
                     variable.delete_value(value)
 
-                    if target: print(f"{variable.name} = {value} non e' compatibile con i vincoli unari" +
-                                     f" -> Nuovo dominio di {variable.name}: {variable.domain}", file = target)
+                    if target:
+                        data = {"variable": variable.name, "value": value, "domain": variable.domain}
+                        s = "{variable} = {value} non e' compatibile con i vincoli unari -> Nuovo dominio di {variable}: {domain}"
+                        print(s.format(**data), file = target)
 
                     if not variable.domain:
                         return False
                 
-        self.is_node_consistent = True
+        self._is_node_consistent = True
 
         if target: print("Le variabili sono node-consistenti.", file = target)
 
@@ -242,14 +244,14 @@ class CSPSolver:
         bool
             True se le variabili sono arc consistenti, altrimenti False
         """
-        
+
         if not node:
             node = self._root
         
         if not self._is_node_consistent:
             if not self.apply_node_consistency(node, target):
                 return False
-
+                
         if target: print("Applico arc-consistency...", file = target)
 
         # Aggiungo tutti i vincoli del problema
@@ -332,8 +334,10 @@ class CSPSolver:
                 changed = True
                 variable_1.delete_value(value_1)
 
-                if target: print(f"{variable_1.name} = {value_1} non e' compatibile con i valori di {variable_2.name}" +
-                                 f" -> Nuovo dominio di {variable_1.name}: {variable_1.domain}", file = target)
+                if target:
+                    data = {"var1": variable_1.name, "value1": value_1, "var2": variable_2.name, "domain1": variable_1.domain}
+                    s = "{var1} = {value1} non e' compatibile con i valori di {var2} -> Nuovo dominio di {var1}: {domain1}"
+                    print(s.format(**data), file=target)
             
         return changed
 
