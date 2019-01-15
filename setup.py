@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 from platform import architecture
 
-python_arch = platform.architecture()[0]
+python_arch = architecture()[0]
 
 requirements_32 = [
     # pycairo
