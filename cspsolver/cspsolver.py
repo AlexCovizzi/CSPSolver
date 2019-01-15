@@ -177,7 +177,7 @@ class CSPSolver:
             self._is_solved = True
 
         return self._solutions
-    
+
     def apply_node_consistency(self, node: Optional[Node] = None, target: Optional[TextIO] = None) -> bool:
         """
         Applica la node consistency.
@@ -201,7 +201,6 @@ class CSPSolver:
         """
 
         if target: print("Applico node-consistency...", file = target)
-
         if not node:
             node = self._root
 
@@ -209,20 +208,20 @@ class CSPSolver:
             for value in variable.domain[:]:
                 if not self._constraints.verify({variable.name: value}):
                     variable.delete_value(value)
-                    if target: print(f"{variable.name} = {value} non e' compatibile con i vincoli unari" + \
-                                    f" -> Nuovo dominio di {variable.name}: {variable.domain}", file = target)
-                    
+
+                    if target: print(f"{variable.name} = {value} non e' compatibile con i vincoli unari" +
+                                     f" -> Nuovo dominio di {variable.name}: {variable.domain}", file = target)
+
                     if not variable.domain:
-                        if target: print("La variabile {variable} non è node-consistente.".format(variable=variable.name), file = target)
                         return False
                 
-        self._is_node_consistent = True
+        self.is_node_consistent = True
 
         if target: print("Le variabili sono node-consistenti.", file = target)
 
         return True
-    
-    def apply_arc_consistency(self, node: Optional[Node]=None, target: Optional[TextIO] = None) -> bool:
+
+    def apply_arc_consistency(self, node: Optional[Node]=None, target: Optional[TextIO] = None):
         """
         Applica la arc consistency.
 
@@ -243,9 +242,7 @@ class CSPSolver:
         bool
             True se le variabili sono arc consistenti, altrimenti False
         """
-
-        if target: print("Applico arc-consistency...", file = target)
-
+        
         if not node:
             node = self._root
         
@@ -253,48 +250,92 @@ class CSPSolver:
             if not self.apply_node_consistency(node, target):
                 return False
 
-        for variable_1 in node.get_variables():
-            for variable_2 in [v for v in node.get_variables() if not v.value and variable_1.name != v.name]:
-                # La variabile 1 è assegnata: potrà cambiare solo il dominio della variabile 2
-                if variable_1.value:
-                    for value_2 in variable_2.domain[:]:
-                        if not self._constraints.verify({variable_1.name: variable_1.value, variable_2.name: value_2}):
-                            variable_2.delete_value(value_2)
+        if target: print("Applico arc-consistency...", file = target)
 
-                            if target:
-                                data = {"assigned": variable_1.name, "assigned_value": variable_1.value,
-                                        "not_assigned": variable_2.name, "not_assigned_value": value_2, "not_assigned_domain": variable_2.domain}
-                                s = "{not_assigned} = {not_assigned_value} non e' compatibile con {assigned} = {assigned_value}" + \
-                                    " -> Nuovo dominio di {not_assigned}: {not_assigned_domain}"
-                                print(s.format(**data) , file = target)
+        # Aggiungo tutti i vincoli del problema
+        worklist = []
+        for index, v1 in enumerate(node.get_variables()):
+            for v2 in node.get_variables()[index + 1:]:
+                c1, c2 = self._constraints.get_binary_constraints(v1.name, v2.name)
+                if c1 or c2:
+                    worklist.append([v1.name, v2.name])
 
-                            if not variable_2.domain:
-                                if target: print("Le variabili non sono arc-consistenti.", file = target)
-                                return False
-                # La variabile 1 non è assegnata: potranno cambiare entrambi i domini
-                else:
-                    for value_1 in variable_1.domain[:]:
-                        delete_value = True
+        # Ciclo sui vincoli
+        while worklist:
+            couple = worklist.pop(0)
 
-                        for value_2 in variable_2.domain:
-                            if self._constraints.verify({variable_1.name: value_1, variable_2.name: value_2}):
-                                delete_value = False
-                        
-                        if delete_value:
-                            variable_1.delete_value(value_1)
+            variable_1 = node.get_variable_by_name(couple[0])
+            variable_2 = node.get_variable_by_name(couple[1])
 
-                            if target:
-                                data = {"var1": variable_1.name, "var1_value": value_1, "var1_domain": variable_1.domain,
-                                        "var2": variable_2.name}
-                                s = "{var1} = {var1_value} non e' compatibile con {var2} -> Nuovo dominio di {var1}: {var1_domain}"
-                                print(s.format(**data) , file = target)
+            variable_1_changed = False
+            variable_2_changed = False
+
+            # Entrambe le variabili non assegnate
+            if not variable_1.value and not variable_2.value:
+                variable_1_changed = self._verify_arc_consistency(variable_1, variable_2, target)
+                
+                variable_2_changed = self._verify_arc_consistency(variable_2, variable_1, target)
+
+            # variable_1 assegnata, variable_2 non assegnata
+            elif variable_1.value and not variable_2.value:
+                variable_2_changed = self._verify_arc_consistency(variable_2, variable_1, target)
+            
+            # variable_1 non assegnata, variable_2 assegnata
+            elif not variable_1.value and variable_2.value:
+                variable_1_changed = self._verify_arc_consistency(variable_1, variable_2, target)
+            
+            # Se entrambe sono assegnate, non fa nulla
+
+            if variable_1_changed:
+                if not variable_1.domain:
+                    return False
                     
-                        if not variable_1.domain:
-                            if target: print("Le variabili non sono arc-consistenti.", file = target)
-                            return False
+                for v in [v for v in node.get_variables() if v.name != variable_2.name and v.name != variable_1.name]:
+                    c1, c2 = self._constraints.get_binary_constraints(variable_1.name, v.name)
+                    if c1 or c2:
+                        worklist.append([variable_1.name, v.name])
 
-        if target: print("Le variabili sono arc-consistenti.", file = target)
+            if variable_2_changed:
+                if not variable_2.domain:
+                    return False
+                
+                for v in [v for v in node.get_variables() if v.name != variable_2.name and v.name != variable_1.name]:
+                    c1, c2 = self._constraints.get_binary_constraints(variable_2.name, v.name)
+                    if c1 or c2:
+                        worklist.append([variable_2.name, v.name])
+
+        if target: print("I vincoli sono arc-consistenti.", file = target)
+
         return True
+
+    def _verify_arc_consistency(self, variable_1: Variable, variable_2: Variable, target: Optional[TextIO]):
+        changed = False
+
+        # Ciclo sul dominio di variable_1
+        for value_1 in variable_1.domain[:]:
+            delete_value = True
+
+            # variable_2 non è assegnata
+            if not variable_2.value:
+                # Cerco un valore di variable_2 che soddisfi il vincolo se variable_1 = value_1
+                for value_2 in variable_2.domain:
+                    if self._constraints.verify({variable_1.name: value_1, variable_2.name: value_2}):
+                        delete_value = False
+                        break
+            
+            # variable_2 è assegnata: verifico che variable_1 = value_1 soddisfi il vincolo con la variabile già assegnata
+            elif self._constraints.verify({variable_1.name: value_1, variable_2.name: variable_2.value}):
+                delete_value = False
+
+            # variable_1 = value_1 non soddisfa alcun vincolo con variable_2
+            if delete_value:
+                changed = True
+                variable_1.delete_value(value_1)
+
+                if target: print(f"{variable_1.name} = {value_1} non e' compatibile con i valori di {variable_2.name}" +
+                                 f" -> Nuovo dominio di {variable_1.name}: {variable_1.domain}", file = target)
+            
+        return changed
 
     def _next_step(self, current_node: Node, tree_depth: int, one_solution: bool, target: Optional[TextIO]):
         # assegno la variabile e faccio uno snapshot delle variabili
