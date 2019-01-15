@@ -1,19 +1,21 @@
 # CSPSolver
-Libreria in python per risolvere problemi di soddisfacimento di vincoli.
+Libreria in python per risolvere e rappresentare problemi di soddisfacimento di vincoli.
 
 ## Requisiti
 
 Python versione >= 3.5
 
+Per **Linux** e **MacOS** sono necessarie le librerie python [pycairo](https://cairographics.org/pycairo/) e [python-igraph](https://igraph.org/python/).
+
 ## Installazione
 
-la libreria può essere installata direttamente da github:
+questa libreria può essere installata direttamente da github con il comando:
 
 ```
 pip install git+https://github.com/AlexCovizzi/CSPSolver
 ```
 
-### Esempio di utilizzo
+## Esempio di utilizzo
 
 ```
 import cspsolver
