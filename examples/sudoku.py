@@ -11,7 +11,7 @@ from cspsolver import CSPSolver, Algorithm, Policy, draw_constraint_graph, draw_
 # con scelta della variabile da assegnare secondo la regola Minimum Remaining Values,
 # e con arc-consistency applicata ad ogni passo
 if __name__ == "__main__":
-    solver = CSPSolver(Algorithm.FullLookAhead, Policy.MinimumRemainingValues, True)
+    solver = CSPSolver(Algorithm.AC3, Policy.MinimumRemainingValues)
 
     # cell_ij -> riga i, colonna j
     for i in range(1, 10):

@@ -9,7 +9,7 @@ from cspsolver import CSPSolver, Algorithm, Policy, draw_constraint_graph, draw_
 # esempio delle N regine risolto con algoritmo Forward Checking e
 # con scelta della variabile da assegnare secondo la regola Insert Order
 if __name__ == "__main__":
-    solver = CSPSolver(Algorithm.ForwardChecking, Policy.InsertOrder, step_arc_consistency=False)
+    solver = CSPSolver(Algorithm.ForwardChecking, Policy.InsertOrder)
     
     n = int(argv[1]) if len(argv) > 1 else 8
     n += 1

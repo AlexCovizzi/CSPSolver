@@ -9,6 +9,7 @@ class Node:
         self.children: List[Node] = []
         self.solution = False
         self.failure = False
+        self._node_consistent = parent.is_node_consistent() if parent else False
         self._last_assigned_variable: Variable = Variable.Null()
 
         for variable in variables:
@@ -53,6 +54,12 @@ class Node:
     # setta questo nodo come nodo soluzione
     def set_solution(self):
         self.solution = True
+
+    def set_node_consistent(self):
+        self._node_consistent = True
+
+    def is_node_consistent(self) -> bool:
+        return self._node_consistent
     
     def __str__(self):
         string = ""
