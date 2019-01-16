@@ -3,7 +3,7 @@ Libreria in python per risolvere e rappresentare problemi di soddisfacimento di 
 
 ## Requisiti
 
-Python versione >= 3.5
+Python versione >= 3.6
 
 Per **Linux** e **MacOS** sono necessarie le librerie python [pycairo](https://cairographics.org/pycairo/) e [python-igraph](https://igraph.org/python/).
 
