@@ -6,8 +6,7 @@ if module_path not in sys_path: sys_path.append(module_path)
 
 from cspsolver import CSPSolver, Algorithm, Policy, draw_constraint_graph, draw_decision_tree
 
-# esempio delle N regine risolto con algoritmo Forward Checking e
-# con scelta della variabile da assegnare secondo la regola Insert Order
+# esempio recuperato da un esercizio svolto in classe, in cui viene applicata la arc-consistenza
 if __name__ == "__main__":
     solver = CSPSolver()
 

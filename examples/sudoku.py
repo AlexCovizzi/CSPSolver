@@ -7,9 +7,8 @@ if module_path not in sys_path: sys_path.append(module_path)
 from cspsolver import CSPSolver, Algorithm, Policy, draw_constraint_graph, draw_decision_tree
 
 
-# esempio del sudoku risolto con algoritmo Full Look Ahead,
-# con scelta della variabile da assegnare secondo la regola Minimum Remaining Values,
-# e con arc-consistency applicata ad ogni passo
+# esempio del sudoku risolto con algoritmo AC3 ad ogni assegnamento,
+# con scelta della variabile da assegnare secondo la regola Minimum Remaining Values
 if __name__ == "__main__":
     solver = CSPSolver(Algorithm.AC3, Policy.MinimumRemainingValues)
 
