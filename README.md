@@ -7,6 +7,23 @@ Python versione >= 3.6
 
 Per **Linux** e **MacOS** sono necessarie le librerie python [pycairo](https://cairographics.org/pycairo/) e [python-igraph](https://igraph.org/python/).
 
+Per **Ubuntu** e derivati, seguire questi passi:
+```
+sudo apt-get install libcairo2-dev
+sudo apt-get install libigraph0-dev
+
+# da fare solo se su Ubuntu 16.04
+sudo add-apt-repository ppa:jonathonf/python-3.6
+sudo apt-get update
+
+sudo apt-get install python3.6
+sudo apt-get install python3-pip
+sudo apt-get install python3.6-dev
+
+python3.6 -m pip install pycairo
+python3.6 -m pip install python-igraph
+```
+
 ## Installazione
 
 questa libreria può essere installata direttamente da github con il comando:
