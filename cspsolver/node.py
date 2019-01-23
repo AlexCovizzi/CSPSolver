@@ -4,13 +4,13 @@ from .variable import Variable
 
 class Node:
     def __init__(self, parent: Optional["Node"], variables: List[Variable]):
-        self._variables: OrderedDict[str, Variable] = OrderedDict()
+        self._variables = OrderedDict()
         self.parent = parent
-        self.children: List[Node] = []
+        self.children = []
         self.solution = False
         self.failure = False
         self._node_consistent = parent.is_node_consistent() if parent else False
-        self._last_assigned_variable: Variable = Variable.Null()
+        self._last_assigned_variable = Variable.Null()
 
         for variable in variables:
             self.add_variable(variable)

@@ -3,7 +3,7 @@ from typing import Union, Callable, Dict, Tuple, List, Any, NewType
 class Constraints:
 
     def __init__(self):
-        self._constraints : Dict[Union[Tuple[str], Tuple[str, str]], List[Callable]] = {}
+        self._constraints = {}
 
     # aggiungi un vincolo unario o binario
     def add_constraint(self, variables: Union[Tuple[str], Tuple[str, str]], constraint: Callable):

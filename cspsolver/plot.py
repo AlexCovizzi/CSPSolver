@@ -93,7 +93,7 @@ def draw_decision_tree(solver: CSPSolver, target = "decision_tree.pdf", print_do
 
     layout = graph.layout_reingold_tilford(root=[0])
 
-    visual_style: dict = {}
+    visual_style = {}
     n_leaf = graph.vcount() - sum([1 for n in graph.vs["state"] if n == "normal"])
 
     margin = 70

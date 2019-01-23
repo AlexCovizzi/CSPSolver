@@ -51,9 +51,9 @@ class CSPSolver:
     # init
     def __init__(self, algorithm: Callable[[Node, Constraints, int, str, Optional[TextIO]], bool] = Algorithm.StandardBacktracking,
                  policy: Callable[[Node, Constraints, int], Variable] = Policy.InsertOrder):
-        self._constraints: Constraints = Constraints()
+        self._constraints = Constraints()
         self._root = Node(None, [])
-        self._solutions: List[Node] = []
+        self._solutions = []
         self._found_solution = False
         self._algorithm = algorithm
         self._policy = policy
