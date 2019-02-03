@@ -3,7 +3,7 @@ Libreria in python per risolvere e rappresentare problemi di soddisfacimento di 
 
 ## Requisiti
 
-Python versione >= 3.6
+Python versione >= 3.5
 
 Per **Linux** e **MacOS** sono necessarie le librerie python [pycairo](https://cairographics.org/pycairo/) e [python-igraph](https://igraph.org/python/).
 
@@ -12,16 +12,11 @@ Per **Ubuntu** e derivati, seguire questi passi:
 sudo apt-get install libcairo2-dev
 sudo apt-get install libigraph0-dev
 
-# da fare solo se su Ubuntu 16.04
-sudo add-apt-repository ppa:jonathonf/python-3.6
-sudo apt-get update
-
-sudo apt-get install python3.6
 sudo apt-get install python3-pip
-sudo apt-get install python3.6-dev
+sudo apt-get install python3-dev
 
-python3.6 -m pip install pycairo
-python3.6 -m pip install python-igraph
+python3 -m pip install pycairo
+python3 -m pip install python-igraph
 ```
 
 ## Installazione
